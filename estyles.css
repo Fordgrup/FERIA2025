@@ -1,0 +1,96 @@
+/* Estilos generales */
+body {
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #000; /* Cambiado a color negro */
+    }
+    
+
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    /* Fondo con gradiente y una imagen */
+    background-image: url('descargar.jpg'), linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(255, 0, 0, 0.6));
+    background-size: cover; /* Asegura que la imagen cubra todo el fondo */
+    background-position: center; /* Centra la imagen */
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #fdd835; /* Color dorado */
+}
+
+p {
+    font-size: 1.2rem;
+    margin: 10px 0;
+    text-align: center;
+    max-width: 600px;
+}
+
+/* Contenedor del medidor */
+.circle-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 20px 0;
+}
+
+.circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        #e63946 0% 50%, 
+        #f1faee 50% 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333; /* Números en color negro para visibilidad */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.status {
+    margin-top: 20px;
+    font-size: 1.5rem;
+}
+
+/* Botones */
+button, a {
+    padding: 10px 20px;
+    background: #e63946;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 1rem;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin: 10px;
+}
+
+button:hover, a:hover {
+    background: #d62828;
+}
+
+.notification {
+    display: none;
+    background-color: #ff3d00;
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+}

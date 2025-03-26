@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Gas con Arduino <img src="https://upload.wikimedia.org/wikipedia/commons/0/0d/Arduino_Logo.svg" alt="Arduino" style="height: 24px; vertical-align: middle; margin-left: 10px;"></title>
+    <link rel="stylesheet" href="estyles.css">
+    <!-- Enlace a la librería Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Detector de Gas con Arduino</h1>
+    <p>
+        Este proyecto utiliza un sensor MQ-2 para detectar niveles de gas en el ambiente.
+        Si el nivel supera los 525 ppm, se envía una alerta de peligro.
+    </p>
+    
+    <!-- Notificación de alerta -->
+    <div class="notification" id="notification">¡Peligro! Nivel de gas muy alto.</div>
+    
+    <!-- Medidor circular -->
+    <div class="circle-container">
+        <div class="circle" id="gas-level"> <h1>0</h1> </div>
+    </div>
+    
+    <div class="status" id="status">Nivel de gas: Seguro</div>
+    
+    <!-- Botón para prueba de notificación -->
+    <button id="simulate">Simular Gas Alto</button>
+    
+    <!-- Enlace a la página del historial -->
+    <a href="feria2.html" id="go-to-history">Ver Historial de Gas</a>
+    
+    <!-- Área para los gráficos -->
+    <div class="charts">
+        <canvas id="barChart" width="300" height="150"></canvas>
+        <canvas id="lineChart" width="300" height="150"></canvas>
+    </div>
+    
+    <script>
+        // Variables simuladas
+        let gasLevel = 0;
+        let gasData = [];  // Para almacenar los niveles de gas para los gráficos
+
+        // Referencias a elementos de la página
+        const gasLevelEl = document.getElementById('gas-level');
+        const statusEl = document.getElementById('status');
+        const notificationEl = document.getElementById('notification');
+        const simulateBtn = document.getElementById('simulate');
+
+        // Función para actualizar el medidor circular
+        function updateGauge(level) {
+            const percentage = Math.min(level / 1000, 1) * 100; // Normalizar a 100%
+            gasLevelEl.textContent = level; // Mostrar nivel numérico
+            gasLevelEl.style.background = `conic-gradient(
+                #e63946 ${percentage}%, 
+                #f1faee ${percentage}% 100%
+            )`;
+            
+            // Cambiar estado según el nivel de gas
+            if (level > 525) {
+                statusEl.textContent = 'Nivel de gas: Peligro';
+                statusEl.style.color = '#e63946'; // Rojo para peligro
+                showNotification('¡Peligro! Nivel de gas muy alto.');
+                changeTitleToArduino();
+            } else {
+                statusEl.textContent = 'Nivel de gas: Seguro';
+                statusEl.style.color = '#fff';
+                resetTitle();
+            }
+
+            // Almacenar el nivel de gas para los gráficos
+            gasData.push(level);
+            if (gasData.length > 10) {
+                gasData.shift();  // Mantener solo los últimos 10 datos
+            }
+
+            updateCharts(gasData);
+        }
+        
+        // Función para mostrar la notificación
+        function showNotification(message) {
+            notificationEl.innerText = message;
+            notificationEl.style.display = 'block';
+            setTimeout(() => {
+                notificationEl.style.display = 'none';
+            }, 5000); // Ocultar después de 5 segundos
+            // Enviar notificación del navegador
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(message);
+            } else if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification(message);
+                    }
+                });
+            }
+        }
+
+        // Función para cambiar el título de la página con la imagen de Arduino
+        function changeTitleToArduino() {
+            document.title = "Nivel de gas muy alto - ¡Peligro! <img src='https://upload.wikimedia.org/wikipedia/commons/0/0d/Arduino_Logo.svg' alt='Arduino' style='height: 24px; vertical-align: middle; margin-left: 10px;'>";
+        }
+
+        // Función para resetear el título de la página
+        function resetTitle() {
+            document.title = "Detector de Gas con Arduino <img src='https://upload.wikimedia.org/wikipedia/commons/0/0d/Arduino_Logo.svg' alt='Arduino' style='height: 24px; vertical-align: middle; margin-left: 10px;'>";
+        }
+
+        // Simular nivel alto de gas al presionar el botón
+        simulateBtn.addEventListener('click', () => {
+            gasLevel = Math.floor(Math.random() * 300) + 525; // Simular entre 525 y 825
+            updateGauge(gasLevel);
+        });
+
+        // Actualizar medidor periódicamente (simulación)
+        setInterval(() => {
+            gasLevel = Math.floor(Math.random() * 500); // Simular entre 0 y 500
+            updateGauge(gasLevel);
+        }, 3000);
+
+        // Función para actualizar los gráficos
+        function updateCharts(data) {
+            // Gráfico de barras (columna)
+            barChart.data.labels = Array.from({ length: data.length }, (_, i) => i + 1);
+            barChart.data.datasets[0].data = data;
+            barChart.update();
+
+            // Gráfico de línea (montaña)
+            lineChart.data.labels = Array.from({ length: data.length }, (_, i) => i + 1);
+            lineChart.data.datasets[0].data = data;
+            lineChart.update();
+        }
+
+        // Configuración y creación del gráfico de barras
+        const barChart = new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: [], // Etiquetas (vacías al principio)
+                datasets: [{
+                    label: 'Nivel de Gas',
+                    data: [],
+                    backgroundColor: 'rgba(230, 57, 60, 0.6)',
+                    borderColor: 'rgba(230, 57, 60, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Configuración y creación del gráfico de línea (montaña)
+        const lineChart = new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: [], // Etiquetas (vacías al principio)
+                datasets: [{
+                    label: 'Nivel de Gas',
+                    data: [],
+                    fill: true,  // Llenar el área debajo de la línea (gráfico de montaña)
+                    borderColor: 'rgba(230, 57, 60, 1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
